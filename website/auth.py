@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from .models import User
 from . import db
+from flask_login import login_user, login_required, logout_user, current_user
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, \
     check_password_hash  # this creates a password that is hardly to break
-from flask_login import current_user
 
 auth = Blueprint('auth', __name__)
 
@@ -15,10 +15,15 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        user = User.query.filter_by(email=email).first()  # this is to check if the user is already in our database by filtering all the emails
+        user = User.query.filter_by(
+            email=email).first()  # this is to check if the user is already in our database by filtering all the emails
         if user:
-            if check_password_hash(user.password,password):  # this is to check the password of the user if it matches with that of the one in the database
+            if check_password_hash(user.password,
+                                   password):  # this is to check the password of the user if it matches with that of the one in the database
                 flash("logged in successfully", category='success')
+                login_user(user,
+                           remember=True)  # this remembers that the user has login until the user clears their browsing history or session
+                # also to help flask login a user when the web restarts so that the user donot login anytime something happens
                 return redirect(url_for('views.home'))
             else:
                 flash('Incorrect Password, try again.', category='error')
@@ -28,8 +33,10 @@ def login():
 
 
 @auth.route('/logout', methods=["GET", "POST"])
+@login_required  # this makes sure that we dont logout unless the user has already login
 def logout():
-    return render_template("logout.html")
+    logout_user()
+    return redirect(url_for('auth.login'))
 
 
 @auth.route('/sign-up', methods=["GET", "POST"])
@@ -58,8 +65,10 @@ def sign_up():
                             )
             db.session.add(new_user)
             db.session.commit()
+            login_user(user, remember=True)
             flash('Account has been successfully created', category='success')
             return redirect(url_for(
-                'views.home'))  # this will redirect the user to the home page. we used views.py here because we already have the home functionality in the views.py,py
+                'views.home'))  # this will redirect the user to the home page. we used views.py here because we
+            # already have the home functionality in the views.py,py
 
     return render_template("sign_up.html")
