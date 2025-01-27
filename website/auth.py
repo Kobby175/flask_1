@@ -11,7 +11,7 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=["GET", "POST"])
 def login():
-    if request.form == "POST":
+    if request.method == "POST":
         email = request.form.get('email')
         password = request.form.get('password')
 
@@ -29,7 +29,7 @@ def login():
                 flash('Incorrect Password, try again.', category='error')
         else:
             flash('Email does not exist', category='error')
-    return render_template("login.html")
+    return render_template("login.html", user=current_user)
 
 
 @auth.route('/logout', methods=["GET", "POST"])
@@ -65,10 +65,10 @@ def sign_up():
                             )
             db.session.add(new_user)
             db.session.commit()
-            login_user(user, remember=True)
+            login_user(new_user, remember=True)
             flash('Account has been successfully created', category='success')
             return redirect(url_for(
                 'views.home'))  # this will redirect the user to the home page. we used views.py here because we
             # already have the home functionality in the views.py,py
 
-    return render_template("sign_up.html")
+    return render_template("sign_up.html", user=current_user)
