@@ -22,13 +22,16 @@ def login():
                                    password):  # this is to check the password of the user if it matches with that of the one in the database
                 flash("logged in successfully", category='success')
                 login_user(user,
-                           remember=True)  # this remembers that the user has login until the user clears their browsing history or session
+                           remember=True)  # this reminds us that the user has login until the user clears their browsing history or session
                 # also to help flask login a user when the web restarts so that the user donot login anytime something happens
                 return redirect(url_for('views.home'))
             else:
                 flash('Incorrect Password, try again.', category='error')
         else:
             flash('Email does not exist', category='error')
+            return redirect(url_for(
+                'views.home'))  # this will redirect the user to the home page. we used views.py here because we
+            # already have the home functionality in the views.py,py
     return render_template("login.html", user=current_user)
 
 
@@ -67,8 +70,5 @@ def sign_up():
             db.session.commit()
             login_user(new_user, remember=True)
             flash('Account has been successfully created', category='success')
-            return redirect(url_for(
-                'views.home'))  # this will redirect the user to the home page. we used views.py here because we
-            # already have the home functionality in the views.py,py
 
     return render_template("sign_up.html", user=current_user)

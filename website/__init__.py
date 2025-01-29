@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
-from flask_login import LoginManager  # this manages all  our logins
+from flask_login import LoginManager,current_user  # this manages all  our logins
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
@@ -24,15 +24,21 @@ def create_app():
 
     create_database(app)
 
+# this setup flask logins
     login_manager = LoginManager()
     login_manager.login_views = "auth.login" # where we should go if the user is not login
     login_manager.init_app(app)  # tells us which app we are using
 
     # this tells flask how we load a user
     @login_manager.user_loader
-    def load_user(id):
-        return User.query.get(int(id))  # works exactly as filter but this defaultly filters only ids, and tells
+    def load_user(user_id):
+        return User.query.get(int(user_id))  # works exactly as filter but this defaultly filters only ids, and tells
         # flask what user we are looking for
+
+    # Context processor to pass 'current_user' to all templates
+    @app.context_processor
+    def inject_user():
+        return dict(current_user=current_user)
 
     return app
 

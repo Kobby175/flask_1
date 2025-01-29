@@ -18,4 +18,4 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(256), nullable=False)
     firstname = db.Column(db.String(100), nullable=False)  # Ensure this matches
-    todo = db.relationship('Todo') # this allows us to access all the todos created or owned by a user
+    todo = db.relationship('Todo')  # this allows us to access all the todos created or owned by a user
